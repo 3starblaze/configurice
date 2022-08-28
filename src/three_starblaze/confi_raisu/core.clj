@@ -1,7 +1,8 @@
 (ns three-starblaze.confi-raisu.core
   (:require
    [clojure.java.io :as io]
-   [three-starblaze.confi-raisu.examples.example :refer [dunst-data]])
+   [three-starblaze.confi-raisu.examples.example
+    :refer [dunst-data polybar-data]])
   (:import
    [org.ini4j Ini]))
 
@@ -31,7 +32,7 @@
         (.put ini section k v)))
     (with-out-str (.store ini *out*))))
 
-(defn generate-dunst
+(defn generate-ini-config
   "Generate dunst config and return the new command."
   [config]
   (let [file (io/file build-path (:key config))
@@ -44,4 +45,5 @@
     (format (:command config) full-filename)))
 
 (defn main! []
-  (println (generate-dunst dunst-data)))
+  (println (generate-ini-config dunst-data))
+  (println (generate-ini-config polybar-data)))

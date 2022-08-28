@@ -69,7 +69,72 @@
 ;; %s is for generated config path
 (def dunst-command "dunst -config %s")
 
+(def constants
+  {:foreground "#dfdfdf"
+   :background "#222"
+   :background-alt "#444"
+   :primary-color "#ffb52a"
+   :secondary-color "#e60053"
+   :alert-color "#bd2c40"})
+
+(def polybar-config
+  "Simple polybar config with i3 bar."
+  {"bar/example"
+   {"width" "100%"
+    "height" 27
+    "fixed-center" false
+    "foreground" (:foreground constants)
+    "background" (:background constants)
+    "padding-left" 0
+    "padding-right" 20
+    "module-margin-left" 1
+    "module-margin-right" 2
+    "font-0" "fixed:pixelsize=10;1"
+    "font-1" "unifont:fontformat=truetype:size=8:antialias=false;0"
+    "font-2" "Siji:pixelsize=10;1"
+    "modules-left" "i3"
+    "tray-position" "right"
+    "tray-padding" 2
+    "cursor-click" "pointer"
+    "cursor-scroll" "ns-resize"}
+
+   "module/i3"
+   ;; Since there is quite a bit of repetition in label-setting code, I added
+   ;; a helper to reduce the noise.
+   (let [label
+         (fn [label-name bg]
+           (let [full-name (str "label-" label-name)]
+             {full-name "%index%"
+              (str full-name "-background") bg
+              (str full-name "-padding") 2}))]
+     (merge
+      {"type" "internal/i3"
+       "format" "<label-state> <label-mode>"
+       "index-sort" true
+       "wrapping-scroll" false
+
+       "label-mode-padding" 2
+       "label-mode-foreground" "#000"
+       "label-mode-background" (:background-color constants)}
+      (label "focused" (:background-alt constants))
+      (label "unfocused" (:background-color constants))
+      (label "visible" (:background-alt constants))
+      (label "urgent" (:alert-color constants))))
+
+   "settings"
+   {"screenchange-reload" true}
+
+   "global/wm"
+   {"enable-ipc" true
+    "margin-top" 5
+    "margin-bottom" 5}})
+
 (def dunst-data
   {:key "dunst"
    :config dunst-config
    :command dunst-command})
+
+(def polybar-data
+  {:key "polybar"
+   :config polybar-config
+   :command "polybar example -config %s"})
