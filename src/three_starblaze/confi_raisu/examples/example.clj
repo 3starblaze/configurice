@@ -129,6 +129,43 @@
     "margin-top" 5
     "margin-bottom" 5}})
 
+(def rofi-config
+  (let [color-map
+        {"background-color" (:background constants)
+         "color" (:foreground constants)}]
+    {"*"
+     (merge
+      color-map
+      {"font" "Hack 10"})
+
+     "window"
+     (merge
+      color-map
+      {"border" "1px"
+       "border-color" (:foreground constants)
+       "width" "40%"
+       "height" "40%"
+       "spacing" "1px"
+       "children" "[ inputbar, listview ]"})
+
+     "inputbar"
+     (merge
+      color-map
+      {"padding" "10px"
+       "children" "[ entry ]"
+
+       "spacing" "0"})
+
+     "entry"
+     {"color" "inherit"
+      "background-color" "inherit"}
+
+     "element"
+     {"padding" "10px"}
+
+     "element selected"
+     color-map}))
+
 (def dunst-data
   {:key "dunst"
    :config dunst-config
@@ -138,3 +175,8 @@
   {:key "polybar"
    :config polybar-config
    :command "polybar example -config %s"})
+
+(def rofi-data
+  {:key "rofi"
+   :config rofi-config
+   :command "rofi -show drun"})

@@ -2,7 +2,7 @@
   (:require
    [clojure.java.io :as io]
    [three-starblaze.confi-raisu.examples.example
-    :refer [dunst-data polybar-data]])
+    :refer [dunst-data polybar-data rofi-data]])
   (:import
    [org.ini4j Ini]))
 
@@ -32,18 +32,27 @@
         (.put ini section k v)))
     (with-out-str (.store ini *out*))))
 
-(defn generate-ini-config
-  "Generate dunst config and return the new command."
-  [config]
+(defn map->rofi-config [m]
+  (with-out-str
+    (let [indentation "    "]
+      (doseq [[selector vars] m]
+        (printf "%s {\n" selector)
+        (doseq [[k v] vars]
+          (printf (str indentation "%s: %s;\n") k v))
+        (println "}")))))
+
+(defn write-config!
+  [config converter-fn]
   (let [file (io/file build-path (:key config))
         full-filename (.getPath file)]
     (ensure-file-exists! file)
     (with-open [w (io/writer file)]
       (->> (:config config)
-         map->ini
+         converter-fn
          (.write w)))
     (format (:command config) full-filename)))
 
 (defn main! []
-  (println (generate-ini-config dunst-data))
-  (println (generate-ini-config polybar-data)))
+  (println (write-config! dunst-data map->ini))
+  (println (write-config! polybar-data map->ini))
+  (println (write-config! rofi-data map->rofi-config)))
