@@ -68,9 +68,6 @@
     "foreground" "#ffffff"
     "timeout" 0}})
 
-;; %s is for generated config path
-(def dunst-command "dunst -config %s")
-
 (def constants
   {:foreground "#dfdfdf"
    :background "#222"
@@ -172,7 +169,7 @@
   {:key "dunst"
    :config dunst-config
    :mapper util/map->ini
-   :command dunst-command})
+   :command "dunst -config %s"})
 
 (def polybar-data
   {:key "polybar"

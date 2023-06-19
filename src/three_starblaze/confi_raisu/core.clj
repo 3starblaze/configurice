@@ -8,10 +8,13 @@
 (def registry
   [dunst-data polybar-data rofi-data])
 
-(defn error-wrong-usage! []
+(defn error! [msg]
   (binding [*out* *err*]
-      (println "Wrong usage!")
-      (System/exit 1)))
+    (println msg)
+    (System/exit 1)))
+
+(defn error-wrong-usage! []
+  (error! "Wrong usage!"))
 
 (defn list! []
   (doseq [item registry]
@@ -21,10 +24,19 @@
   (doseq [item registry]
     (util/write-config! item)))
 
+(defn run-command! [args]
+  (when (<= (count args) 1) (error-wrong-usage!))
+  (let [config-name (second args)]
+    (if-let [config (->> registry
+                         (filter (fn [config] (= (:key config) config-name)))
+                         first)]
+      (util/run-config! config)
+      (error! (format "Could not find config by key '%s'!" config-name)))))
+
 (defn -main [& args]
-  (case (count args)
-    0 (list!)
-    1 (case (first args)
-        "build" (build!)
-        (error-wrong-usage!))
-    (error-wrong-usage!)))
+  (if (= (count args) 0)
+    (list!)
+    (case (first args)
+      "build" (build!)
+      "run" (run-command! args)
+      (error-wrong-usage!))))
