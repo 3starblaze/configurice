@@ -1,4 +1,6 @@
-(ns three-starblaze.confi-raisu.examples.example)
+(ns three-starblaze.confi-raisu.examples.example
+  (:require
+   [three-starblaze.confi-raisu.util :as util]))
 
 (def dunst-config
   {"global"
@@ -169,14 +171,17 @@
 (def dunst-data
   {:key "dunst"
    :config dunst-config
+   :mapper util/map->ini
    :command dunst-command})
 
 (def polybar-data
   {:key "polybar"
    :config polybar-config
+   :mapper util/map->ini
    :command "polybar example -config %s"})
 
 (def rofi-data
   {:key "rofi"
    :config rofi-config
+   :mapper util/map->rofi-config
    :command "rofi -show drun"})

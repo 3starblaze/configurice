@@ -1,58 +1,30 @@
 (ns three-starblaze.confi-raisu.core
   (:require
-   [clojure.java.io :as io]
+   [clojure.pprint :as pprint]
+   [three-starblaze.confi-raisu.util :as util]
    [three-starblaze.confi-raisu.examples.example
-    :refer [dunst-data polybar-data rofi-data]])
-  (:import
-   [org.ini4j Ini]))
+    :refer [dunst-data polybar-data rofi-data]]))
 
-(def build-path
-  "Full path for auto-built configuration files."
-  (-> (io/file (System/getProperty "user.home") ".config/confi-raisu/build")
-      .getPath))
+(def registry
+  [dunst-data polybar-data rofi-data])
 
-(defn ensure-file-exists!
-  "Recursively create file and every parent directory if they don't exist."
-  ([s]
-   (ensure-file-exists! s false))
-  ([s dir?]
-   (let [f (io/file s)]
-     (when-let [parent (.getParentFile f)]
-       (ensure-file-exists! (.getPath parent) true))
-     (when-not (.exists f)
-       (printf "%s does not exist, creating it ...\n" f)
-       (if dir?
-         (.mkdir f)
-         (.createNewFile f))))))
+(defn error-wrong-usage! []
+  (binding [*out* *err*]
+      (println "Wrong usage!")
+      (System/exit 1)))
 
-(defn map->ini [m]
-  (let [ini (Ini.)]
-    (doseq [[section vars] m]
-      (doseq [[k v] vars]
-        (.put ini section k v)))
-    (with-out-str (.store ini *out*))))
+(defn list! []
+  (doseq [item registry]
+    (pprint/pprint item)))
 
-(defn map->rofi-config [m]
-  (with-out-str
-    (let [indentation "    "]
-      (doseq [[selector vars] m]
-        (printf "%s {\n" selector)
-        (doseq [[k v] vars]
-          (printf (str indentation "%s: %s;\n") k v))
-        (println "}")))))
+(defn build! []
+  (doseq [item registry]
+    (util/write-config! item)))
 
-(defn write-config!
-  [config converter-fn]
-  (let [file (io/file build-path (:key config))
-        full-filename (.getPath file)]
-    (ensure-file-exists! file)
-    (with-open [w (io/writer file)]
-      (->> (:config config)
-         converter-fn
-         (.write w)))
-    (format (:command config) full-filename)))
-
-(defn main! []
-  (println (write-config! dunst-data map->ini))
-  (println (write-config! polybar-data map->ini))
-  (println (write-config! rofi-data map->rofi-config)))
+(defn -main [& args]
+  (case (count args)
+    0 (list!)
+    1 (case (first args)
+        "build" (build!)
+        (error-wrong-usage!))
+    (error-wrong-usage!)))
