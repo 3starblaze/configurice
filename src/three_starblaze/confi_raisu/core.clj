@@ -1,42 +1,19 @@
 (ns three-starblaze.confi-raisu.core
   (:require
-   [clojure.pprint :as pprint]
-   [three-starblaze.confi-raisu.util :as util]
-   [three-starblaze.confi-raisu.examples.example
-    :refer [dunst-data polybar-data rofi-data]]))
+   [clojure.java.io :as io]
+   [three-starblaze.confi-raisu.util :as util]))
 
-(def registry
-  [dunst-data polybar-data rofi-data])
+(defn build-config!
+  "Write foreign configuration and the intermediate file."
+  [config]
+  (doseq [foreign-config (:foreign-configs config)]
+    (util/write-config! foreign-config))
+  (let [edn-data (map (fn [foreign-config]
+                        {:key
+                         (:key foreign-config)
 
-(defn error! [msg]
-  (binding [*out* *err*]
-    (println msg)
-    (System/exit 1)))
-
-(defn error-wrong-usage! []
-  (error! "Wrong usage!"))
-
-(defn list! []
-  (doseq [item registry]
-    (pprint/pprint item)))
-
-(defn build! []
-  (doseq [item registry]
-    (util/write-config! item)))
-
-(defn run-command! [args]
-  (when (<= (count args) 1) (error-wrong-usage!))
-  (let [config-name (second args)]
-    (if-let [config (->> registry
-                         (filter (fn [config] (= (:key config) config-name)))
-                         first)]
-      (util/run-config! config)
-      (error! (format "Could not find config by key '%s'!" config-name)))))
-
-(defn -main [& args]
-  (if (= (count args) 0)
-    (list!)
-    (case (first args)
-      "build" (build!)
-      "run" (run-command! args)
-      (error-wrong-usage!))))
+                         :command-formatted
+                         (format (:command foreign-config) util/build-path)})
+                      (:foreign-configs config))]
+    (with-open [w (io/writer (io/file util/build-path "intermediate.edn"))]
+      (.write w (with-out-str (prn edn-data))))))
