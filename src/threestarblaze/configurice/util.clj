@@ -1,4 +1,4 @@
-(ns three-starblaze.confi-raisu.util
+(ns threestarblaze.configurice.util
   (:require
    [clojure.java.io :as io]
    [clojure.java.shell :refer [sh]])
@@ -7,7 +7,7 @@
 
 (def build-path
   "Full path for auto-built configuration files."
-  (-> (io/file (System/getProperty "user.home") ".config/confi-raisu/build")
+  (-> (io/file (System/getProperty "user.home") ".config/configurice/build")
       .getPath))
 
 (defn ensure-file-exists!

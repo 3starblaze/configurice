@@ -1,7 +1,7 @@
-(ns three-starblaze.confi-raisu.core
+(ns threestarblaze.configurice.core
   (:require
    [clojure.java.io :as io]
-   [three-starblaze.confi-raisu.util :as util]))
+   [threestarblaze.configurice.util :as util]))
 
 (defn build-config!
   "Write foreign configuration and the intermediate file."
