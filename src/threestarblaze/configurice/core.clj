@@ -27,7 +27,8 @@
                          (:key foreign-config)
 
                          :command-formatted
-                         (format (:command foreign-config) util/build-path)})
+                         (format (:command foreign-config)
+                                 (str util/build-path "/" (:key foreign-config)))})
                       (:foreign-configs config))]
     (with-open [w (io/writer (io/file util/build-path "intermediate.edn"))]
       (.write w (with-out-str (prn edn-data))))))
